@@ -1,0 +1,11 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/.
+   - Portions Copyright (C) Philipp Kewisch, 2008-2014 -->
+
+<!ENTITY chromatasks.options.colorToUse.label "Aufgabenfarbe">
+<!ENTITY chromatasks.options.colorToUse.desc "Beim Einfärben der Aufgabe kann entweder die Kalenderfarbe oder die Farbe der Kategorie verwendet werden">
+<!ENTITY chromatasks.options.calendar.label "Kalender">
+<!ENTITY chromatasks.options.category.label "Kategorie">
+<!ENTITY chromatasks.options.useBackground.label "Hintergrundfarbe verwenden">
+<!ENTITY chromatasks.options.useBackground.desc  "Anstatt die Textfarbe zu ändern kann mit dieser Option stattdessen die Hintergrundfarbe der Aufgabe verändert werden">

@@ -2,36 +2,20 @@
 <!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/.
-   - Portions Copyright (C) Philipp Kewisch, 2008 -->
+   - Portions Copyright (C) Philipp Kewisch, 2014 -->
 
-<?xml-stylesheet href="chrome://global/skin/"?>
+<!DOCTYPE vbox SYSTEM "chrome://chromatasks/locale/chromatasks.dtd">
 
-<!DOCTYPE prefwindow SYSTEM "chrome://chromatasks/locale/chromatasks.dtd">
-
-<prefwindow xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-            id="chromatasks-prefs-window"
-            windowtype="extensions:chromatasks:options"
-            width="340"
-            height="180"
-            title="&chromatasks.options.title;">
-  <prefpane id="chromatasks-prefpane" flex="1">
-    <preferences>
-      <preference id="useBackground" name="extensions.chromatasks.useBackground" type="bool"/>
-      <preference id="colorOf" name="extensions.chromatasks.colorOf" type="string"/>
-    </preferences>
-    <description id="chromatasks-colortype-label" for="chromatasks-colortype-group">&chromatasks.options.colorToUse.label;</description>
-    <hbox id="chromatasks-colortype-hbox" style="margin-bottom: 5px; -moz-padding-start: 10px;">
-      <radiogroup id="chromatasks-colortype-group"  orient="horizontal" preference="colorOf">
-        <radio id="chromatasks-colortype-calendar"
-               value="calendar"
-               label="&chromatasks.options.calendar.label;"/>
-        <radio id="chromatasks-colortype-category"
-               value="category"
-               label="&chromatasks.options.category.label;"/>
-      </radiogroup>
-    </hbox>
-    <checkbox id="chromatasks-useBackground-checkbox"
-              preference="useBackground"
-              label="&chromatasks.options.useBackground.label;"/>
-  </prefpane>
-</prefwindow>
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <setting pref="extensions.chromatasks.colorOf" type="radio"
+           title="&chromatasks.options.colorToUse.label;"
+           desc="&chromatasks.options.colorToUse.desc;">
+    <radiogroup>
+      <radio value="calendar" label="&chromatasks.options.calendar.label;"/>
+      <radio value="category" label="&chromatasks.options.category.label;"/>
+    </radiogroup>
+  </setting>
+  <setting pref="extensions.chromatasks.useBackground"  type="bool"
+           title="&chromatasks.options.useBackground.label;"
+           desc="&chromatasks.options.useBackground.desc;"/>
+</vbox>

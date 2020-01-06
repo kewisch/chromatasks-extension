@@ -1,10 +1,11 @@
 <!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/.
-   - Portions Copyright (C) Philipp Kewisch, 2008-2013 -->
+   - Portions Copyright (C) Philipp Kewisch, 2008-2014 -->
 
-<!ENTITY chromatasks.options.title "Chromatasks Options">
-<!ENTITY chromatasks.options.colorToUse.label "Change task color using color of:">
+<!ENTITY chromatasks.options.colorToUse.label "Task Color">
+<!ENTITY chromatasks.options.colorToUse.desc "Either the calendar color or category color can be used to recolor the tasks">
 <!ENTITY chromatasks.options.calendar.label "Calendar">
 <!ENTITY chromatasks.options.category.label "Category">
-<!ENTITY chromatasks.options.useBackground.label "Modify background color instead">
+<!ENTITY chromatasks.options.useBackground.label "Use Background Color">
+<!ENTITY chromatasks.options.useBackground.desc "Instead of changing the text color, this option changes the task background.">

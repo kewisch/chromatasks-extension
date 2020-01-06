@@ -132,9 +132,12 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
     } else {
       let ruleText = aSelector + "{ " + (aUseBackground ? "background-" : "") +
             "color: " + aColor + " !important; }";
-      let ruleIndex = sheet.insertRule(ruleText, sheet.cssRules.length);
-      let rule = sheet.cssRules[ruleIndex];
-      aCache[aKey] = rule;
+      try {
+        let ruleIndex = sheet.insertRule(ruleText, sheet.cssRules.length);
+        aCache[aKey] = sheet.cssRules[ruleIndex];
+      } catch (e) {
+        Components.utils.reportError("[chromatasks] Could not add rule: " + ruleText + "\n" + e);
+      }
     }
 
     updateTree();
