@@ -1,0 +1,26 @@
+{
+  "extensionName": {
+    "message": "Chromatasks"
+  },
+  "extensionDescription": {
+    "message": "Color task list rows with calendar or category color"
+  },
+  "colorOf.calendar": {
+    "message": "Calendar"
+  },
+  "colorOf.category": {
+    "message": "Category"
+  },
+  "useBackground": {
+    "message": "Use Background Color"
+  },
+  "useBackground.title": {
+    "message": "Use Instead of changing the text color, this option changes the task background."
+  },
+  "colorToUse": {
+    "message": "Task Color"
+  },
+  "colorToUse.title": {
+    "message": "Either the calendar color or category color can be used to recolor the tasks."
+  }
+}

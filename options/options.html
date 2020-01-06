@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/.
+   - Portions Copyright (C) Philipp Kewisch, 2019 -->
+
+<html>
+  <head>
+    <link rel="stylesheet" href="extension.css" type="text/css">
+    <link rel="stylesheet" href="options.css" type="text/css">
+    <script src="options.js"></script>
+  </head>
+  <body>
+    <div class="browser-style" id="colorOf" type="radio">
+      <input type="radio" id="colorOf-calendar" name="colorOf" value="calendar">
+      <label for="colorOf-calendar" data-l10n-id="colorOf.calendar"></label>
+
+      <input type="radio" id="colorOf-category" name="colorOf" value="category">
+      <label for="colorOf-category" data-l10n-id="colorOf.category"></label>
+    </div>
+    <div class="browser-style">
+      <input type="checkbox" id="useBackground" name="useBackground">
+      <label for="useBackground" data-l10n-id="useBackground"></label>
+    </div>
+  </body>
+</html>

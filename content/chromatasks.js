@@ -1,25 +1,27 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- * Portions Copyright (C) Philipp Kewisch, 2008-2013 */
+ * Portions Copyright (C) Philipp Kewisch, 2008-2019 */
 
 "use strict";
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://calendar/modules/calUtils.jsm");
-
 (function () {
+  const ADDON_ID = "{25cf5f06-b211-4df3-9d5a-c0ab253a5561}";
+  const DEFAULT_PREFS = {
+    colorOf: "calendar",
+    useBackground: false
+  };
+
+  var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+  var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+  var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
+  var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+
   var calendarRuleCache = {};
   var categoryRuleCache = {};
 
-  var  observer = {
-    QueryInterface: XPCOMUtils.generateQI([
-      Components.interfaces.calICalendarManagerObserver,
-      Components.interfaces.calIObserver,
-      Components.interfaces.nsIObserver,
-    ]),
-
+  var observer = {
+    QueryInterface: ChromeUtils.generateQI([Ci.calICalendarManagerObserver, Ci.calIObserver, Ci.nsIObserver]),
 
     // calICalendarManagerObserver
     onCalendarRegistered: function(aCalendar) {
@@ -64,46 +66,63 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
     },
   };
 
-  function getStyleSheet() {
+  async function getPrefs(...args) {
+    let extension = ExtensionParent.GlobalManager.getExtension(ADDON_ID);
+    let api = await extension.apiManager.asyncGetAPI("storage", extension, "addon_parent");
+    let storage = api.getAPI({ extension  }).storage;
+    return storage.local.callMethodInParentProcess("get", args);
+  }
+
+  async function getStyleSheet() {
     if (!getStyleSheet.sheet) {
-      const cssUri = "chrome://chromatasks/content/chromasheet.css";
-      for each (let sheet in document.styleSheets) {
-        if (sheet.href == cssUri) {
-            getStyleSheet.sheet = sheet;
-            break;
-        }
-      }
+      let link = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        "link"
+      );
+
+      link.setAttribute("id", "chromatasks-styles");
+      link.setAttribute("rel", "stylesheet");
+      link.setAttribute("type", "text/css");
+      link.setAttribute("href", "chrome://chromatasks/content/chromasheet.css");
+
+      await new Promise((resolve) => {
+        link.onload = resolve;
+        document.documentElement.appendChild(link);
+      });
+
+      getStyleSheet.sheet = link.sheet;
     }
     return getStyleSheet.sheet;
   }
 
-  function reloadAllRules() {
+  async function reloadAllRules() {
     // First remove all rules
-    let sheet = getStyleSheet();
+    let sheet = await getStyleSheet();
     while (sheet.cssRules.length) {
       sheet.deleteRule(0);
     }
+    debugger;
 
     calendarRuleCache = {};
     categoryRuleCache = {};
 
     // Update calendar color rules
-    let calMgr = getCalendarManager();
+    let calMgr = cal.getCalendarManager();
     let cals = calMgr.getCalendars({});
-    for each (let calendar in cals) {
+    for (let calendar of cals) {
       updateCalendarColor(calendar);
     }
 
     // Update category color rules
     let categories = Services.prefs.getChildList("calendar.category.color.");
-    for each (let cat in categories) {
-      var catName = cat.substr(24);
+    for (let cat of categories) {
+      let catName = cat.substr(24);
       updateCategoryColor(catName);
     }
   }
 
-  function removeColor(aKey, aCache) {
-    var sheet = getStyleSheet();
+  async function removeColor(aKey, aCache) {
+    let sheet = await getStyleSheet();
 
     if (aKey in aCache) {
       let rule = aCache[aKey];
@@ -118,8 +137,8 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
     updateTree();
   }
 
-  function updateColor(aSelector, aColor, aKey, aCache, aUseBackground) {
-    let sheet = getStyleSheet();
+  async function updateColor(aSelector, aColor, aKey, aCache, aUseBackground) {
+    let sheet = await getStyleSheet();
     let found = false;
 
     let thisproperty = (aUseBackground ? "background-color" : "color");
@@ -130,38 +149,39 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
       rule.style.setProperty(thisproperty, aColor, "important");
       rule.style.removeProperty(otherproperty);
     } else {
-      let ruleText = aSelector + "{ " + (aUseBackground ? "background-" : "") +
-            "color: " + aColor + " !important; }";
+      let ruleText = `${aSelector} { ${aUseBackground ? "background-" : ""}color: ${aColor} !important; }`;
       try {
         let ruleIndex = sheet.insertRule(ruleText, sheet.cssRules.length);
         aCache[aKey] = sheet.cssRules[ruleIndex];
       } catch (e) {
-        Components.utils.reportError("[chromatasks] Could not add rule: " + ruleText + "\n" + e);
+        Cu.reportError(`[chromatasks] Could not add rule: ${ruleText}\n: ${e}`);
       }
     }
 
     updateTree();
   }
 
-  function updateCalendarColor(aCalendar) {
-    if (cal.getPrefSafe("extensions.chromatasks.colorOf", "calendar") == "calendar") {
-      let useBackground = cal.getPrefSafe("extensions.chromatasks.useBackground", false);
+  async function updateCalendarColor(aCalendar) {
+    let prefs = await getPrefs(DEFAULT_PREFS);
+
+    if (prefs.colorOf == "calendar") {
       let color = aCalendar.getProperty("color") || "#A8C2E1";
-      let pseudoclass = (useBackground ? "-moz-tree-row" : "-moz-tree-cell-text");
+      let pseudoclass = (prefs.useBackground ? "-moz-tree-row" : "-moz-tree-cell-text");
       let selector = ".calendar-task-tree > treechildren::" + pseudoclass +
-          "(calendarid-" + formatStringForCSSRule(aCalendar.id) + ")";
-      updateColor(selector, color, aCalendar.id, calendarRuleCache, useBackground)
+          "(calendarid-" + cal.view.formatStringForCSSRule(aCalendar.id) + ")";
+      await updateColor(selector, color, aCalendar.id, calendarRuleCache, prefs.useBackground)
     }
   }
 
-  function updateCategoryColor(aCategory) {
-    if (cal.getPrefSafe("extensions.chromatasks.colorOf", "calendar") == "category") {
-      let useBackground = cal.getPrefSafe("extensions.chromatasks.useBackground", false);
-      let color = cal.getPrefSafe("calendar.category.color." + aCategory) || "";
-      let pseudoclass = (useBackground ? "-moz-tree-row" : "-moz-tree-cell-text");
+  async function updateCategoryColor(aCategory) {
+    let prefs = await getPrefs(DEFAULT_PREFS);
+
+    if (prefs.colorOf == "category") {
+      let color = Services.prefs.getStringPref("calendar.category.color." + aCategory, "") || "";
+      let pseudoclass = (prefs.useBackground ? "-moz-tree-row" : "-moz-tree-cell-text");
       let selector = ".calendar-task-tree > treechildren::" + pseudoclass +
           "(" + aCategory + ")";
-      updateColor(selector, color, aCategory, categoryRuleCache, useBackground);
+      await updateColor(selector, color, aCategory, categoryRuleCache, prefs.useBackground);
     }
   }
 
@@ -171,34 +191,31 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
     for (let i = 0; i < trees.length; i++) {
       // XXX This doesn't work for some reason, we have to live with that now.
       let realtree = document.getAnonymousNodes(trees[i])[0];
-      realtree.treeBoxObject.invalidate();
+      realtree.invalidate();
     }
   }
 
-  function load() {
+  async function load() {
     window.removeEventListener("load", load, false);
-    reloadAllRules();
+    await reloadAllRules();
 
-    let calMgr = getCalendarManager();
+    let calMgr = cal.getCalendarManager();
     calMgr.addObserver(observer);
     calMgr.addCalendarObserver(observer);
 
     Services.prefs.addObserver("calendar.category.color.", observer, false);
-    Services.prefs.addObserver("extensions.chromatasks.", observer, false);
   }
 
-  function unload() {
+  async function unload() {
     window.removeEventListener("unload", unload, false);
-    Services.prefs.removeObserver("extensions.chromatasks.", observer, false);
 
-    let calMgr = getCalendarManager();
+    let calMgr = cal.getCalendarManager();
     calMgr.removeObserver(observer);
     calMgr.removeCalendarObserver(observer);
 
     Services.prefs.removeObserver("calendar.category.color.", observer);
-    Services.prefs.removeObserver("extensions.chromatasks.", observer);
   }
 
-  window.addEventListener("load", load, false);
+  load();
   window.addEventListener("unload", unload, false);
 })();

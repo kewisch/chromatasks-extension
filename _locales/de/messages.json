@@ -1,0 +1,26 @@
+{
+  "extensionName": {
+    "message": "Chromatasks"
+  },
+  "extensionDescription": {
+    "message": "Färbe die Aufgabenliste mit der Kalender- oder Kategorienfarbe"
+  },
+  "colorOf.calendar": {
+    "message": "Kalender"
+  },
+  "colorOf.category": {
+    "message": "Kategorie"
+  },
+  "useBackground": {
+    "message": "Hintergrundfarbe verwenden"
+  },
+  "useBackground.title": {
+    "message": "Anstatt die Textfarbe zu ändern kann mit dieser Option stattdessen die Hintergrundfarbe der Aufgabe verändert werden."
+  },
+  "colorToUse": {
+    "message": "Aufgabenfarbe"
+  },
+  "colorToUse.title": {
+    "message": "Beim Einfärben der Aufgabe kann entweder die Kalenderfarbe oder die Farbe der Kategorie verwendet werden."
+  }
+}
